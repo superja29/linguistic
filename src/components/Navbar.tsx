@@ -41,6 +41,7 @@ export const Navbar: React.FC = () => {
                   <User className="w-4 h-4" />
                   <span>Dashboard</span>
                 </Link>
+                <Link to="/tutor-dashboard" className="text-slate-500 hover:text-slate-900 ml-2">Tutor Portal</Link>
                 <div className="h-4 w-px bg-slate-200"></div>
                 
                 <button 
@@ -67,10 +68,6 @@ export const Navbar: React.FC = () => {
                   Sign Up
                 </button>
               </>
-            )}
-            
-            {!user && !loading && (
-              <Link to="/tutor-dashboard" className="text-slate-500 hover:text-slate-900 ml-2">Tutor Portal</Link>
             )}
           </div>
           

@@ -40,7 +40,7 @@ export const TutorCard: React.FC<Props> = ({ tutor, className }) => {
             className="absolute -bottom-2 -right-2 w-6 h-4 rounded shadow-sm"
           />
         </div>
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col items-end pr-10">
           <span className="text-lg font-bold text-slate-900">${tutor.price}<span className="text-sm font-normal text-slate-400">/hr</span></span>
           <div className="flex items-center space-x-1 text-orange-500 font-medium">
             <Star className="w-4 h-4 fill-current" />
