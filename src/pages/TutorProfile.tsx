@@ -65,10 +65,10 @@ export const TutorProfile: React.FC = () => {
                   <span className="text-sm font-bold text-slate-400 ml-1">/hr</span>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full">
-                  <button onClick={() => navigate(`/book/${tutor.id}`)} className="flex-1 bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-indigo-700 transition">
+                  <button onClick={() => navigate(`/book/${tutor.id}`)} className="flex-1 bg-indigo-600 text-white font-bold py-2.5 px-6 rounded-xl hover:bg-indigo-700 transition">
                     Book Trial Lesson
                   </button>
-                  <button onClick={() => navigate(`/messages?tutor=${tutor.id}`)} className="flex-1 bg-white text-indigo-600 border border-indigo-200 font-bold py-3 px-6 rounded-xl hover:bg-indigo-50 transition">
+                  <button onClick={() => navigate(`/messages?tutor=${tutor.id}`)} className="flex-1 bg-white text-indigo-600 border border-indigo-200 font-bold py-2.5 px-6 rounded-xl hover:bg-indigo-50 transition">
                     Send Message
                   </button>
                 </div>
