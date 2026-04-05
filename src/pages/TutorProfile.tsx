@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
-import { Star, MessageSquare, Play, Calendar, CheckCircle2, Award, BookOpen, GraduationCap } from 'lucide-react';
+import { Star, MessageSquare, Play, Calendar, CheckCircle2, Award, BookOpen, GraduationCap, Zap, Globe } from 'lucide-react';
 import { Footer } from '../components/Footer';
 import { TutorCard } from '../components/TutorCard';
 
@@ -25,45 +25,100 @@ export const TutorProfile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 pt-16">
-      <div className="bg-white border-b border-slate-200">
-        <div className="h-48 bg-gradient-to-r from-indigo-900 to-indigo-800 w-full relative">
-          <div className="absolute -bottom-16 left-6 md:left-auto md:max-w-7xl md:mx-auto w-full px-6 flex items-end relative h-full">
-            <div className="relative transform translate-y-16">
-              <img src={tutor.avatar} alt={tutor.name} className="w-32 h-32 rounded-3xl border-4 border-white bg-indigo-50 shadow-lg" />
-              {tutor.is_online && (
-               <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 border-4 border-white rounded-full"></div>
-              )}
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen flex flex-col bg-slate-50 pt-16 relative">
+      {/* Solid Purple Background */}
+      <div className="absolute top-16 left-0 right-0 h-64 bg-[#7e22ce] z-0"></div>
 
-        <div className="max-w-7xl mx-auto px-6 mt-20 pb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-extrabold text-slate-900">{tutor.name}</h1>
-              <img src={`https://flagcdn.com/w40/${tutor.country_code}.png`} alt="Flag" className="w-8 rounded shadow-sm" />
-            </div>
-            <p className="text-lg text-slate-500 font-medium">Professional English Tutor</p>
-            <div className="flex flex-wrap gap-4 mt-4 text-sm font-medium text-slate-600">
-              <div className="flex items-center gap-1"><Star className="w-5 h-5 text-orange-500 fill-current" /> {tutor.rating.toFixed(1)} ({tutor.reviews.length} reviews)</div>
-              <div className="flex items-center gap-1"><UsersIcon className="w-5 h-5 text-indigo-500" /> {tutor.total_students} students</div>
-              <div className="flex items-center gap-1"><CheckCircle2 className="w-5 h-5 text-green-500" /> {tutor.completion_rate}% completion</div>
-            </div>
-          </div>
-          
-          <div className="flex gap-4 w-full md:w-auto">
-            <button onClick={() => navigate(`/messages?tutor=${tutor.id}`)} className="flex-1 md:flex-none flex items-center justify-center gap-2 border-2 border-indigo-100 text-indigo-700 bg-white hover:bg-slate-50 px-6 py-3 rounded-xl font-bold transition-colors">
-              <MessageSquare className="w-5 h-5" /> Message
-            </button>
-            <button onClick={() => navigate(`/book/${tutor.id}`)} className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 px-8 py-3 rounded-xl font-bold transition-all shadow-md shadow-indigo-200">
-              <Calendar className="w-5 h-5" /> Book Trial
-            </button>
-          </div>
+      <div className="max-w-7xl mx-auto w-full px-6 pt-10 relative z-10">
+        {/* Main Header Card */}
+        <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 mb-8">
+           
+           {/* Top flex row: Avatar + Name + Action/Price */}
+           <div className="flex flex-col md:flex-row gap-8 items-start md:items-center">
+             
+             {/* Avatar element */}
+             <div className="relative flex-shrink-0">
+               <img src={tutor.avatar} alt={tutor.name} className="w-32 h-32 rounded-3xl border border-slate-100 bg-indigo-50 shadow-sm" />
+               {tutor.is_online && (
+                 <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-green-500 border-4 border-white rounded-full"></div>
+               )}
+             </div>
+
+             {/* Name & Rating */}
+             <div className="flex-1">
+               <div className="flex items-center gap-3 mb-2">
+                 <h1 className="text-[2.5rem] font-extrabold text-slate-900 leading-none tracking-tight">{tutor.name}</h1>
+                 <img src={`https://flagcdn.com/w40/${tutor.country_code}.png`} alt="Flag" className="w-8 rounded shadow-sm" />
+                 <CheckCircle2 className="w-6 h-6 text-blue-500" />
+               </div>
+               <div className="flex items-center gap-1.5 text-sm font-bold text-slate-700">
+                 <Star className="w-5 h-5 text-orange-500 fill-current" /> 
+                 <span>{tutor.rating.toFixed(1)}</span>
+                 <span className="font-normal text-slate-400">({tutor.reviews.length} reviews)</span>
+               </div>
+             </div>
+
+             {/* Price and Buttons */}
+             <div className="flex flex-col items-center md:items-end gap-3 min-w-[240px]">
+                <div className="text-right">
+                  <span className="text-[2.5rem] font-black text-indigo-700 leading-none">${tutor.price}</span>
+                  <span className="text-sm font-bold text-slate-400 ml-1">/hr</span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
+                  <button onClick={() => navigate(`/book/${tutor.id}`)} className="flex-1 bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-indigo-700 transition">
+                    Book Trial Lesson
+                  </button>
+                  <button onClick={() => navigate(`/messages?tutor=${tutor.id}`)} className="flex-1 bg-white text-indigo-600 border border-indigo-200 font-bold py-3 px-6 rounded-xl hover:bg-indigo-50 transition">
+                    Send Message
+                  </button>
+                </div>
+             </div>
+           </div>
+
+           {/* Divider */}
+           <div className="w-full h-px bg-slate-100 my-8"></div>
+
+           {/* Stats Row */}
+           <div className="grid grid-cols-2 md:grid-cols-5 gap-6 text-center md:divide-x divide-slate-100">
+             <div className="flex flex-col items-center gap-1.5">
+               <div className="flex items-center gap-2 text-indigo-600 text-sm font-bold">
+                 <BookOpen className="w-5 h-5" /> {tutor.lessons_taught}
+               </div>
+               <div className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Lessons</div>
+             </div>
+             
+             <div className="flex flex-col items-center gap-1.5">
+               <div className="flex items-center gap-2 text-indigo-600 text-sm font-bold">
+                 <UsersIcon className="w-5 h-5" /> {tutor.total_students}
+               </div>
+               <div className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Students</div>
+             </div>
+             
+             <div className="flex flex-col items-center gap-1.5">
+               <div className="flex items-center gap-2 text-indigo-600 text-sm font-bold">
+                 <CheckCircle2 className="w-5 h-5" /> {tutor.completion_rate}%
+               </div>
+               <div className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Completion</div>
+             </div>
+             
+             <div className="flex flex-col items-center gap-1.5">
+               <div className="flex items-center gap-2 text-indigo-600 text-sm font-bold">
+                 <Zap className="w-5 h-5" /> {tutor.response_time}
+               </div>
+               <div className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Response</div>
+             </div>
+             
+             <div className="flex flex-col items-center gap-1.5">
+               <div className="flex items-center gap-2 text-indigo-600 text-sm font-bold">
+                 <Globe className="w-5 h-5" /> {tutor.languages.length}
+               </div>
+               <div className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Languages</div>
+             </div>
+           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-12 w-full">
+      <div className="max-w-7xl mx-auto px-6 pb-12 flex flex-col lg:flex-row gap-12 w-full mt-2">
         {/* Main Content */}
         <div className="flex-1 space-y-12">
           {/* Video Section */}
