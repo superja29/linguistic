@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, CheckCircle2, CalendarDays } from 'lucide-react';
-import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const MORNING_SLOTS = ['08:00', '09:00', '10:00', '11:00'];
@@ -11,16 +12,21 @@ const ALL_SLOTS = [...MORNING_SLOTS, ...AFTERNOON_SLOTS, ...EVENING_SLOTS];
 
 export const AvailabilityManager: React.FC = () => {
   const navigate = useNavigate();
-  const { tutors, updateTutorAvailability } = useAppContext();
+  const { user } = useAuth();
   
-  // Hardcoded to tutor-1 for the MVP Tutor Dashboard context
-  const currentTutor = tutors.find(t => t.id === 'tutor-1');
-  
-  const [availability, setAvailability] = useState<Record<string, string[]>>(
-    currentTutor ? { ...currentTutor.availability } : {}
-  );
-  
+  const [availability, setAvailability] = useState<Record<string, string[]>>({});
   const [showToast, setShowToast] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchAvail = async () => {
+      const { data } = await supabase.from('tutors').select('availability').eq('id', user.id).single();
+      if (data && data.availability) {
+        setAvailability(typeof data.availability === 'string' ? JSON.parse(data.availability) : data.availability as Record<string, string[]>);
+      }
+    };
+    fetchAvail();
+  }, [user]);
 
   const toggleSlot = (day: string, time: string) => {
     setAvailability(prev => {
@@ -39,11 +45,9 @@ export const AvailabilityManager: React.FC = () => {
       DAYS.forEach(day => {
         let daySlots = next[day] || [];
         if (state) {
-          // Add slots that aren't there
           const toAdd = slotsToToggle.filter(s => !daySlots.includes(s));
           daySlots = [...daySlots, ...toAdd].sort();
         } else {
-          // Remove slots
           daySlots = daySlots.filter(s => !slotsToToggle.includes(s));
         }
         next[day] = daySlots;
@@ -54,11 +58,18 @@ export const AvailabilityManager: React.FC = () => {
 
   const clearAll = () => setAvailability({});
 
-  const handleSave = () => {
-    if (currentTutor) {
-      updateTutorAvailability(currentTutor.id, availability);
+  const handleSave = async () => {
+    if (!user) return;
+    
+    const { error } = await supabase.from('tutors')
+      .update({ availability: availability })
+      .eq('id', user.id);
+      
+    if (!error) {
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
+    } else {
+      console.error(error);
     }
   };
 

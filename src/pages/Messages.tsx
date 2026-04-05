@@ -13,14 +13,15 @@ export const Messages: React.FC = () => {
   const [inputVal, setInputVal] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // If URL has ?tutor=id, open/create that conversation
   useEffect(() => {
     const tutorId = searchParams.get('tutor');
     if (tutorId) {
-      const convId = createOrGetConversation(tutorId);
-      if (convId) {
-        setActiveConvId(convId);
-      }
+      (async () => {
+        const convId = await createOrGetConversation(tutorId);
+        if (convId) {
+          setActiveConvId(convId);
+        }
+      })();
     } else if (conversations.length > 0 && !activeConvId) {
       setActiveConvId(conversations[0].id);
     }
@@ -33,19 +34,14 @@ export const Messages: React.FC = () => {
 
   const activeConversation = conversations.find(c => c.id === activeConvId);
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputVal.trim() || !activeConvId) return;
     
-    // For MVP context, we assume we are the 'student' sending a message to a 'tutor', unless we are looking at TutorDashboard.
-    // We'll hardcode sender as student here to simulate the student's perspective.
-    sendMessage(activeConvId, inputVal.trim(), 'student');
+    // Asynchronously send the real message to Supabase via Context.
+    const textStr = inputVal.trim();
     setInputVal('');
-
-    // Simulate dummy reply after 2 seconds
-    setTimeout(() => {
-      sendMessage(activeConvId, "Thanks for messaging! I'll get back to you shortly.", 'tutor');
-    }, 2000);
+    await sendMessage(activeConvId, textStr);
   };
 
   return (

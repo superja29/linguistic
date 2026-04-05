@@ -1,10 +1,80 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DollarSign, Clock, Users, ChevronRight, CheckCircle2, UserCircle } from 'lucide-react';
+import { DollarSign, Clock, ChevronRight, CheckCircle2, UserCircle, Rocket, Loader2 } from 'lucide-react';
 import { Footer } from '../components/Footer';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
+import { TutorOnboarding } from '../components/TutorOnboarding';
 
 export const TutorDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  const [isTutor, setIsTutor] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [lessons, setLessons] = useState<any[]>([]);
+
+  const checkTutorStatus = useCallback(async () => {
+    if (!user) return;
+    const { data: tutorData } = await supabase
+      .from('tutors')
+      .select('id')
+      .eq('id', user.id)
+      .single();
+      
+    if (tutorData) {
+      setIsTutor(true);
+      const { data: lessonData } = await supabase
+        .from('lessons')
+        .select('*, profiles:student_id(name, avatar)')
+        .eq('tutor_id', user.id);
+        
+      if (lessonData) setLessons(lessonData);
+    } else {
+      setIsTutor(false);
+    }
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    checkTutorStatus();
+  }, [user, checkTutorStatus]);
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-slate-800 mb-4">You need to log in</h2>
+          <button onClick={() => navigate('/')} className="text-indigo-600 font-semibold hover:underline">Return Home</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (isTutor === false) {
+    return (
+      <div className="min-h-screen flex flex-col bg-slate-50 pt-16">
+        <TutorOnboarding onComplete={() => checkTutorStatus()} />
+        <Footer />
+      </div>
+    );
+  }
+
+  // Calculate dummy earnings based on lessons length
+  const earnings = lessons.length * 20;
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 pt-16">
       <div className="bg-white border-b border-slate-200">
@@ -40,8 +110,8 @@ export const TutorDashboard: React.FC = () => {
                 This Month
                 <DollarSign className="w-5 h-5 text-indigo-300" />
               </div>
-              <div className="text-4xl font-black mb-1">$1,240<span className="text-lg text-indigo-300">.50</span></div>
-              <div className="text-sm font-medium text-indigo-200 flex items-center gap-1"><span className="text-green-400">↑ 12%</span> vs last month</div>
+              <div className="text-4xl font-black mb-1">${earnings}<span className="text-lg text-indigo-300">.00</span></div>
+              <div className="text-sm font-medium text-indigo-200 flex items-center gap-1">Based on {lessons.length} lessons</div>
             </div>
             
             <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
@@ -49,7 +119,7 @@ export const TutorDashboard: React.FC = () => {
                 Pending Payout
                 <Clock className="w-5 h-5 text-slate-300" />
               </div>
-              <div className="text-3xl font-black text-slate-900 mb-1">$350<span className="text-lg text-slate-400">.00</span></div>
+              <div className="text-3xl font-black text-slate-900 mb-1">$0<span className="text-lg text-slate-400">.00</span></div>
               <div className="text-sm font-medium text-slate-500">Clears in 2 days</div>
             </div>
 
@@ -58,45 +128,43 @@ export const TutorDashboard: React.FC = () => {
                 Total Earnings
                 <DollarSign className="w-5 h-5 text-slate-300" />
               </div>
-              <div className="text-3xl font-black text-slate-900 mb-1">$14,500</div>
-              <div className="text-sm font-medium text-slate-500">Since Jan 2022</div>
+              <div className="text-3xl font-black text-slate-900 mb-1">${earnings}</div>
+              <div className="text-sm font-medium text-slate-500">Lifetime records</div>
             </div>
           </div>
 
           <section>
-            <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">Today's Schedule</h2>
+            <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">Your Schedule</h2>
             <div className="space-y-4">
               
-              <div className="bg-white p-5 rounded-2xl border-2 border-indigo-100 shadow-sm flex items-center gap-4">
-                <div className="w-16 h-16 rounded-xl bg-indigo-50 border border-indigo-100 flex flex-col justify-center items-center text-indigo-700 font-bold shrink-0">
-                  <span className="text-xl">10</span>
-                  <span className="text-xs uppercase">AM</span>
+              {lessons.length === 0 ? (
+                <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200">
+                  <p className="text-slate-500 font-medium">No lessons booked yet.</p>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-slate-900 text-lg">IELTS Speaking Prep</h3>
-                  <div className="flex items-center gap-2 text-slate-500 text-sm mt-1">
-                    <img src="https://api.dicebear.com/9.x/notionists/svg?seed=student1" className="w-5 h-5 rounded-full" />
-                    <span>with <b>Yuki Tanaka</b></span>
-                  </div>
-                </div>
-                <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-md active:scale-95 whitespace-nowrap">
-                  Start Lesson
-                </button>
-              </div>
-
-              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 opacity-70">
-                <div className="w-16 h-16 rounded-xl bg-slate-200 border border-slate-300 flex flex-col justify-center items-center text-slate-600 font-bold shrink-0">
-                  <span className="text-xl">09</span>
-                  <span className="text-xs uppercase">AM</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-slate-900 text-lg line-through">Business Conversation</h3>
-                  <div className="flex items-center gap-2 text-slate-500 text-sm mt-1">
-                    <CheckCircle2 className="w-4 h-4 text-green-500" /> Completed
-                  </div>
-                </div>
-                <div className="font-bold text-slate-400 px-6 py-3">Done</div>
-              </div>
+              ) : (
+                lessons.map((lesson) => {
+                  const lDate = new Date(lesson.date_time);
+                  return (
+                    <div key={lesson.id} className="bg-white p-5 rounded-2xl border-2 border-indigo-100 shadow-sm flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-xl bg-indigo-50 border border-indigo-100 flex flex-col justify-center items-center text-indigo-700 font-bold shrink-0">
+                        <span className="text-xl">{lDate.getHours() % 12 || 12}</span>
+                        <span className="text-xs uppercase">{lDate.getHours() >= 12 ? 'PM' : 'AM'}</span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-slate-900 text-lg">{lesson.subject}</h3>
+                        <div className="flex items-center gap-2 text-slate-500 text-sm mt-1">
+                          <img src={lesson.profiles?.avatar || 'https://api.dicebear.com/9.x/notionists/svg?seed=student1'} className="w-5 h-5 rounded-full" />
+                          <span>with <b>{lesson.profiles?.name || 'A Student'}</b></span>
+                        </div>
+                        <div className="text-xs text-indigo-500 mt-1 font-semibold">{lDate.toLocaleDateString()}</div>
+                      </div>
+                      <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-md active:scale-95 whitespace-nowrap">
+                        Message
+                      </button>
+                    </div>
+                  );
+                })
+              )}
 
             </div>
           </section>
@@ -108,22 +176,11 @@ export const TutorDashboard: React.FC = () => {
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
             <h3 className="text-lg font-bold text-slate-900 mb-4">Availability Overview</h3>
             
-            <div className="space-y-3 mb-6">
-              {[ {d: 'Mon', s: 4}, {d: 'Tue', s: 0}, {d: 'Wed', s: 3}, {d: 'Thu', s: 2}, {d: 'Fri', s: 6} ].map(day => (
-                <div key={day.d} className="flex justify-between items-center text-sm font-medium">
-                  <span className="text-slate-500">{day.d}</span>
-                  <div className="flex gap-1">
-                    {[...Array(6)].map((_, i) => (
-                      <div key={i} className={`w-3 h-3 rounded-full ${i < day.s ? 'bg-indigo-500' : 'bg-slate-100'}`}></div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <p className="text-sm text-slate-500 mb-6">Manage your schedule to allow students to book lessons with you directly.</p>
 
             <button 
               onClick={() => navigate('/tutor-availability')}
-              className="mt-4 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-all flex justify-between items-center px-4"
+              className="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-3 rounded-xl transition-all flex justify-between items-center px-4 shadow-sm"
             >
               Manage Availability <ChevronRight className="w-4 h-4" />
             </button>

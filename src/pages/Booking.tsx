@@ -23,17 +23,21 @@ export const Booking: React.FC = () => {
 
   const availableDays = Object.keys(tutor.availability);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!pkg || !selectedDate || !selectedTime) return;
-    addLesson({
-      id: Math.random().toString(36).substr(2, 9),
-      tutor_name: tutor.name,
-      avatar: tutor.avatar,
-      date_time: `${selectedDate} at ${selectedTime}`,
-      subject: pkg.name
-    });
-    alert('Booking Confirmed!');
-    navigate('/dashboard');
+    
+    // Simulate parsing the string day "Monday" and time "10:00 AM" into a future Date object for DB
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + Math.floor(Math.random() * 7) + 1); // Random day next week
+    futureDate.setHours(parseInt(selectedTime.split(':')[0]) || 10, 0, 0, 0);
+
+    try {
+      await addLesson(tutor.id, pkg.name, futureDate);
+      alert('Booking Confirmed!');
+      navigate('/dashboard');
+    } catch (e: any) {
+      alert('Error booking lesson: ' + e.message);
+    }
   };
 
   return (
