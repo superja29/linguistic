@@ -10,6 +10,7 @@ import { StudentDashboard } from './pages/StudentDashboard';
 import { TutorDashboard } from './pages/TutorDashboard';
 import { AvailabilityManager } from './pages/AvailabilityManager';
 import { Settings } from './pages/Settings';
+import { Messages } from './pages/Messages';
 
 const Layout = () => (
   <>
@@ -32,8 +33,7 @@ function App() {
             <Route path="/tutor-dashboard" element={<TutorDashboard />} />
             <Route path="/tutor-availability" element={<AvailabilityManager />} />
             <Route path="/settings" element={<Settings />} />
-            {/* Fallback routes for pages not critical to MVP but listed in PRD */}
-            <Route path="/messages" element={<div className="pt-32 text-center text-2xl font-bold">Messages Integration Coming Soon</div>} />
+            <Route path="/messages" element={<Messages />} />
           </Route>
         </Routes>
       </BrowserRouter>

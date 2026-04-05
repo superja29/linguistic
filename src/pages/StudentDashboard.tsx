@@ -1,10 +1,13 @@
 import React from 'react';
 import { useAppContext } from '../context/AppContext';
-import { BookOpen, Star, Clock, Flame, Calendar, Video } from 'lucide-react';
+import { BookOpen, Star, Clock, Flame, Calendar, Video, Heart } from 'lucide-react';
 import { Footer } from '../components/Footer';
+import { TutorCard } from '../components/TutorCard';
 
 export const StudentDashboard: React.FC = () => {
-  const { upcomingLessons } = useAppContext();
+  const { upcomingLessons, tutors, favoriteTutors } = useAppContext();
+  
+  const myFavorites = tutors.filter(t => favoriteTutors.includes(t.id));
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 pt-16">
@@ -86,6 +89,27 @@ export const StudentDashboard: React.FC = () => {
               <a href="/tutors" className="inline-block bg-indigo-600 text-white font-bold px-6 py-3 rounded-xl transition hover:bg-indigo-700 shadow-md shadow-indigo-200">
                 Find a Tutor
               </a>
+            </div>
+          )}
+        </section>
+
+        <section className="pt-8 border-t border-slate-100">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2"><Heart className="w-6 h-6 text-pink-500 fill-current" /> Favorite Tutors</h2>
+            <a href="/tutors" className="text-indigo-600 font-bold hover:text-indigo-700 transition">Find more</a>
+          </div>
+          
+          {myFavorites.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {myFavorites.map(tutor => (
+                <TutorCard key={tutor.id} tutor={tutor} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-3xl border border-slate-100 shadow-sm">
+              <Heart className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-slate-900 mb-2">No favorite tutors yet</h3>
+              <p className="text-slate-500">Save your favorite tutors to easily book them later.</p>
             </div>
           )}
         </section>

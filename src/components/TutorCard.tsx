@@ -1,8 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Tutor } from '../types';
-import { Star, Play, MessageSquare } from 'lucide-react';
+import { Star, MessageSquare, Heart } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { useAppContext } from '../context/AppContext';
 
 interface Props {
   tutor: Tutor;
@@ -10,9 +11,24 @@ interface Props {
 }
 
 export const TutorCard: React.FC<Props> = ({ tutor, className }) => {
+  const { favoriteTutors, toggleFavorite } = useAppContext();
+  const isFavorite = favoriteTutors.includes(tutor.id);
+
   return (
-    <div className={cn("bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col h-full", className)}>
-      <div className="flex items-start justify-between mb-4">
+    <div className={cn("bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col h-full relative", className)}>
+      
+      <button 
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleFavorite(tutor.id);
+        }}
+        className="absolute top-4 right-4 z-10 p-2 bg-white/80 backdrop-blur rounded-full shadow-sm hover:bg-white hover:scale-110 text-slate-400 hover:text-pink-500 transition-all border border-slate-100"
+      >
+        <Heart className={`w-5 h-5 ${isFavorite ? 'fill-pink-500 text-pink-500' : 'text-slate-400 leading-none'}`} />
+      </button>
+
+      <div className="flex items-start justify-between mb-4 mt-2">
         <div className="relative">
           <img src={tutor.avatar} alt={tutor.name} className="w-16 h-16 rounded-2xl bg-indigo-50" />
           {tutor.is_online && (
