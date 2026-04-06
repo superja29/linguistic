@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 import { X, Mail, Lock, User, Loader2 } from 'lucide-react';
 
 interface AuthModalProps {
@@ -9,6 +10,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login' }) => {
+  const navigate = useNavigate();
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,6 +40,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
         if (error) throw error;
         // Si no hay error, el inicio de sesión o confirmación del correo se maneja nativamente
         onClose();
+        if (window.location.pathname === '/') {
+          navigate('/dashboard');
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -45,6 +50,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
         });
         if (error) throw error;
         onClose();
+        if (window.location.pathname === '/') {
+          navigate('/dashboard');
+        }
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred during authentication');

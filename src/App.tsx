@@ -12,6 +12,7 @@ import { TutorDashboard } from './pages/TutorDashboard';
 import { AvailabilityManager } from './pages/AvailabilityManager';
 import { Settings } from './pages/Settings';
 import { Messages } from './pages/Messages';
+import { BecomeTutor } from './pages/BecomeTutor';
 
 const Layout = () => (
   <>
@@ -29,6 +30,7 @@ function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<Landing />} />
               <Route path="/tutors" element={<Marketplace />} />
+              <Route path="/become-tutor" element={<BecomeTutor />} />
               <Route path="/tutor/:id" element={<TutorProfile />} />
               <Route path="/book/:id" element={<Booking />} />
               <Route path="/dashboard" element={<StudentDashboard />} />

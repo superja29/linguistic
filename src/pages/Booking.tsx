@@ -13,7 +13,7 @@ export const Booking: React.FC = () => {
   
   const [step, setStep] = useState(1);
   const [selectedPkg, setSelectedPkg] = useState<number | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<{dateObj: Date, formatted: string, dayName: string} | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [notes, setNotes] = useState('');
 
@@ -21,15 +21,44 @@ export const Booking: React.FC = () => {
 
   const pkg = selectedPkg !== null ? tutor.hourly_packages[selectedPkg] : null;
 
-  const availableDays = Object.keys(tutor.availability);
+  const DAYS_MAP: Record<string, number> = {
+    'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3,
+    'Thursday': 4, 'Friday': 5, 'Saturday': 6
+  };
+
+  const getAvailableDates = useMemo(() => {
+    if (!tutor || !tutor.availability) return [];
+    const validDays = Object.keys(tutor.availability);
+    const validIndices = validDays.map(d => DAYS_MAP[d]);
+    
+    const dates = [];
+    const today = new Date();
+    
+    // Scan next 14 days
+    for (let i = 1; i <= 14; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      
+      if (validIndices.includes(d.getDay())) {
+        const dayName = Object.keys(DAYS_MAP).find(k => DAYS_MAP[k] === d.getDay());
+        if (dayName) {
+          dates.push({
+            dateObj: d,
+            formatted: d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }),
+            dayName: dayName
+          });
+        }
+      }
+    }
+    return dates;
+  }, [tutor]);
 
   const handleConfirm = async () => {
     if (!pkg || !selectedDate || !selectedTime) return;
     
-    // Simulate parsing the string day "Monday" and time "10:00 AM" into a future Date object for DB
-    const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + Math.floor(Math.random() * 7) + 1); // Random day next week
-    futureDate.setHours(parseInt(selectedTime.split(':')[0]) || 10, 0, 0, 0);
+    const futureDate = new Date(selectedDate.dateObj);
+    const [hours, minutes] = selectedTime.split(':');
+    futureDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
 
     try {
       await addLesson(tutor.id, pkg.name, futureDate);
@@ -85,13 +114,14 @@ export const Booking: React.FC = () => {
               <div className="mb-6">
                 <label className="block text-sm font-bold text-slate-700 mb-2">Select Day</label>
                 <div className="flex flex-wrap gap-3">
-                  {availableDays.map(day => (
+                  {getAvailableDates.length === 0 && <span className="text-sm text-slate-500 font-medium">No slots available for the next 14 days.</span>}
+                  {getAvailableDates.map(dateOption => (
                     <button 
-                      key={day}
-                      onClick={() => { setSelectedDate(day); setSelectedTime(''); }}
-                      className={`px-4 py-2 rounded-xl border-2 font-medium transition-all ${selectedDate === day ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-200 hover:border-indigo-200 bg-white text-slate-700'}`}
+                      key={dateOption.formatted}
+                      onClick={() => { setSelectedDate(dateOption); setSelectedTime(''); }}
+                      className={`px-4 py-2 rounded-xl border-2 font-medium transition-all ${selectedDate?.formatted === dateOption.formatted ? 'border-indigo-600 bg-indigo-600 text-white shadow-md' : 'border-slate-200 hover:border-indigo-200 bg-white text-slate-700'}`}
                     >
-                      {day}
+                      {dateOption.formatted}
                     </button>
                   ))}
                 </div>
@@ -101,7 +131,7 @@ export const Booking: React.FC = () => {
                 <div className="mb-8">
                   <label className="block text-sm font-bold text-slate-700 mb-2">Select Time</label>
                   <div className="grid grid-cols-3 gap-3">
-                    {tutor.availability[selectedDate].map(time => (
+                    {tutor.availability[selectedDate.dayName].map(time => (
                       <button 
                         key={time}
                         onClick={() => { setSelectedTime(time); setStep(3); }}
@@ -167,9 +197,9 @@ export const Booking: React.FC = () => {
                 <div className="flex gap-3 items-start">
                   <span className="bg-white p-2 rounded-lg shadow-sm text-indigo-600"><Calendar className="w-5 h-5" /></span>
                   <div>
-                    <div className="text-sm text-slate-500 font-medium">Date & Time</div>
+                    <div className="sm text-slate-500 font-medium">Date & Time</div>
                     <div className="font-bold text-slate-900">
-                      {selectedDate ? `${selectedDate}` : 'Not selected'}
+                      {selectedDate ? `${selectedDate.formatted}` : 'Not selected'}
                       {selectedTime && `, ${selectedTime}`}
                     </div>
                   </div>

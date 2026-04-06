@@ -5,6 +5,7 @@ import { Footer } from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { TutorOnboarding } from '../components/TutorOnboarding';
+import { AuthModal } from '../components/AuthModal';
 
 export const TutorDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -47,10 +48,7 @@ export const TutorDashboard: React.FC = () => {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-slate-800 mb-4">You need to log in</h2>
-          <button onClick={() => navigate('/')} className="text-indigo-600 font-semibold hover:underline">Return Home</button>
-        </div>
+        <AuthModal isOpen={true} onClose={() => navigate('/')} />
       </div>
     );
   }

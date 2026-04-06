@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { BookOpen, Search, MessageSquare, User, Menu, LogOut, Loader2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { BookOpen, Search, MessageSquare, User, Menu, LogOut, Loader2, Sliders } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { AuthModal } from './AuthModal';
 
 export const Navbar: React.FC = () => {
   const { user, signOut, loading } = useAuth();
+  const navigate = useNavigate();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
 
   const openAuth = (mode: 'login' | 'signup') => {
     setAuthMode(mode);
     setIsAuthModalOpen(true);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
   };
 
   return (
@@ -33,19 +39,23 @@ export const Navbar: React.FC = () => {
               <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
             ) : user ? (
               <>
+                <Link to="/dashboard" className="hover:text-indigo-600 transition-colors flex items-center space-x-1">
+                  <User className="w-4 h-4" />
+                  <span>Dashboard</span>
+                </Link>
                 <Link to="/messages" className="hover:text-indigo-600 transition-colors flex items-center space-x-1">
                   <MessageSquare className="w-4 h-4" />
                   <span>Messages</span>
                 </Link>
-                <Link to="/dashboard" className="hover:text-indigo-600 transition-colors flex items-center space-x-1">
-                  <User className="w-4 h-4" />
-                  <span>Dashboard</span>
+                <Link to="/settings" className="hover:text-indigo-600 transition-colors flex items-center space-x-1">
+                  <Sliders className="w-4 h-4" />
+                  <span>Settings</span>
                 </Link>
                 <Link to="/tutor-dashboard" className="text-slate-500 hover:text-slate-900 ml-2">Tutor Portal</Link>
                 <div className="h-4 w-px bg-slate-200"></div>
                 
                 <button 
-                  onClick={signOut}
+                  onClick={handleSignOut}
                   className="hover:text-red-600 transition-colors flex items-center space-x-1"
                 >
                   <LogOut className="w-4 h-4" />
